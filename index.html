@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دليل المحاور – لقاء مع إياس</title>
+<style>
+:root{
+  --ink:#17262B; --paper:#F2F5F3; --panel:#fff; --teal:#0E6F68; --mint:#DDEFEA;
+  --amber:#B7791F; --red:#B42318; --line:#D3DBD7; --muted:#5B6B70; --fs:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Segoe UI",Tahoma,"Noto Sans Arabic",system-ui,sans-serif;
+  font-size:var(--fs);line-height:1.75;padding-bottom:110px;
+}
+button{font:inherit;color:inherit}
+button:focus-visible,textarea:focus-visible{outline:3px solid #5FD0C3;outline-offset:2px}
+
+/* ---------- Top band ---------- */
+.top{position:sticky;top:0;z-index:5;background:var(--ink);color:#fff;padding:12px 14px 12px}
+.clocks{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;max-width:760px;margin:0 auto}
+.clock .lbl{font-size:13px;opacity:.72}
+.clock .val{font-variant-numeric:tabular-nums;font-weight:700;line-height:1.05;direction:ltr;text-align:right}
+.clock.main .val{font-size:46px}
+.clock.sec{text-align:left}
+.clock.sec .val{font-size:30px;text-align:left}
+.val.warn{color:#F4B556}
+.val.over{color:#FF8A7A}
+.chip{display:inline-block;margin-top:8px;padding:2px 12px;border-radius:999px;font-size:14px;background:rgba(255,255,255,.14)}
+.chip.ahead{background:#1E7F75}
+.chip.late{background:#8F5E12}
+.chip.vlate{background:#9E2A1D}
+.bar{display:flex;gap:3px;height:12px;margin:10px auto 0;max-width:760px}
+.seg{position:relative;background:rgba(255,255,255,.18);border-radius:3px;overflow:hidden;cursor:pointer;border:0;padding:0}
+.seg i{position:absolute;top:0;bottom:0;right:0;width:0;background:#5FD0C3}
+.seg.past i{background:#3C8F86;width:100%}
+.seg.over i{background:#F0A53A}
+.seg.active{outline:2px solid #fff;outline-offset:1px}
+
+/* ---------- Tabs ---------- */
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:12px 14px 6px;scrollbar-width:none;max-width:760px;margin:0 auto}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 14px;font-size:15px;cursor:pointer;white-space:nowrap}
+.tab .m{opacity:.6;font-size:13px;margin-inline-start:4px}
+.tab.sel{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tab.live::after{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#1BB5A6;margin-inline-start:7px}
+
+/* ---------- View ---------- */
+.view{max-width:760px;margin:0 auto;padding:6px 14px 18px}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:8px 0 10px}
+.head h2{margin:0;font-size:1.25em;line-height:1.4}
+.head .cnt{font-size:14px;color:var(--muted);white-space:nowrap}
+.jump{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#FFF4DD;border:1px solid #E8CC8C;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:15px}
+.jump button{background:var(--ink);color:#fff;border:0;border-radius:8px;padding:6px 12px;cursor:pointer}
+.say{background:var(--mint);border-inline-start:5px solid var(--teal);border-radius:10px;padding:12px 14px;margin:0 0 12px}
+.say.out{margin:12px 0 0}
+.q{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:right;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.q .ck{flex:none;width:26px;height:26px;border-radius:50%;border:2px solid #B8C4BF;margin-top:4px;display:grid;place-items:center;color:#fff;font-size:15px;line-height:1}
+.q .tx b{color:var(--teal);margin-inline-end:4px}
+.q.done{opacity:.5}
+.q.done .ck{background:var(--teal);border-color:var(--teal)}
+.q.main{border:1px solid #9CC9C2;border-inline-start:7px solid var(--teal);background:#fff;font-weight:600;padding:14px 14px}
+.q.main .ck{border-color:var(--teal)}
+.q.main .tx b{font-weight:700}
+.follows{margin:-2px 0 12px;margin-inline-start:22px;padding-inline-start:10px;border-inline-start:2px dashed #C9D6D1}
+.q.sub{background:#F7FAF8;border:1px dashed #CBD6D1;border-radius:10px;padding:8px 12px;margin-bottom:6px;font-size:.88em;color:#5F7076;font-weight:400}
+.q.sub .ck{width:20px;height:20px;border-width:2px;border-color:#C3CFCA;font-size:12px;margin-top:5px}
+.q.sub .tx b{color:#6F8A85;font-weight:600}
+.q.sub.done .ck{background:#8FB5AE;border-color:#8FB5AE}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13.5px;color:var(--muted);margin:0 0 10px}
+.legend span::before{content:"";display:inline-block;vertical-align:middle;margin-inline-end:6px}
+.legend .lm::before{width:14px;height:14px;border-radius:4px;background:#fff;border:1px solid #9CC9C2;border-inline-start:5px solid var(--teal)}
+.legend .ls::before{width:14px;height:14px;border-radius:4px;background:#F7FAF8;border:1px dashed #AEBDB8}
+.trans{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--ink);color:#fff}
+.trans small{display:block;opacity:.7;font-size:13px;margin-bottom:2px}
+.notes{margin-top:16px}
+.notes label{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
+.notes textarea{width:100%;min-height:96px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:inherit;font-size:16px;background:var(--panel);color:var(--ink)}
+.tip{font-size:15px;color:var(--muted);margin:0 0 10px}
+
+/* ---------- Dock ---------- */
+.dock{position:fixed;bottom:0;left:0;right:0;z-index:6;background:var(--panel);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));}
+.dock .row{display:flex;gap:10px;max-width:760px;margin:0 auto}
+.dock button{height:54px;border-radius:14px;border:0;cursor:pointer;font-weight:600}
+.go{flex:1.5;background:var(--teal);color:#fff}
+.go.paused{background:var(--amber)}
+.nx{flex:1;background:var(--mint);color:var(--teal)}
+.nx:disabled{opacity:.45;cursor:default}
+.more{flex:none;width:54px;background:#E9EEEB;font-size:24px;line-height:1}
+.menu{position:fixed;bottom:84px;left:14px;right:14px;max-width:420px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px;z-index:7;box-shadow:0 8px 28px rgba(23,38,43,.18);display:none}
+.menu.open{display:block}
+.menu .it{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;border-radius:10px;padding:10px 12px;text-align:right;cursor:pointer;font-size:16px}
+.menu .it:hover{background:#F0F4F2}
+.menu .fsb{display:flex;gap:6px}
+.menu .fsb span{background:#E9EEEB;border-radius:8px;padding:2px 12px}
+.toast{position:fixed;left:14px;right:14px;bottom:90px;margin:0 auto;max-width:420px;background:var(--ink);color:#fff;border-radius:12px;padding:10px 14px;text-align:center;z-index:8;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="clocks">
+    <div class="clock main">
+      <div class="lbl">المتبقي من اللقاء</div>
+      <div class="val" id="totalVal">40:00</div>
+    </div>
+    <div class="clock sec">
+      <div class="lbl" id="secLbl">المقدمة</div>
+      <div class="val" id="secVal">03:00</div>
+    </div>
+  </div>
+  <div style="max-width:760px;margin:0 auto"><span class="chip" id="chip">لم يبدأ بعد</span></div>
+  <div class="bar" id="bar"></div>
+</header>
+
+<nav class="tabs" id="tabs" aria-label="أقسام اللقاء"></nav>
+<main class="view" id="view"></main>
+
+<div class="menu" id="menu">
+  <button class="it" id="mSound"><span>صوت التنبيه</span><span id="mSoundV">يعمل</span></button>
+  <div class="it" style="cursor:default"><span>حجم الخط</span><span class="fsb"><span id="fsMinus" role="button" tabindex="0">أ-</span><span id="fsPlus" role="button" tabindex="0">أ+</span></span></div>
+  <button class="it" id="mCopy"><span>نسخ كل الملاحظات</span></button>
+  <button class="it" id="mReset"><span>إعادة ضبط اللقاء</span></button>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="dock">
+  <div class="row">
+    <button class="go" id="goBtn">ابدأ اللقاء</button>
+    <button class="nx" id="nextBtn">القسم التالي ‹</button>
+    <button class="more" id="moreBtn" aria-label="المزيد">⋯</button>
+  </div>
+</div>
+
+<script>
+/* ================= المحتوى ================= */
+const SECTIONS = [
+  {
+    name:"المقدمة", short:"المقدمة", mins:3,
+    say:"السلام عليكم ورحمة الله وبركاته، هلا والله بكم، حياكم الله في لقائنا اليوم. كلنا مرينا بالجامعة كطلاب، لكن قليل منا يرجع لها وهو يشوفها من الجهة الثانية، من موقع المسؤولية. ومعنا اليوم ضيفنا الكريم إياس [المنصب]، أهلاً وسهلاً فيك، حيّاك الله.",
+    qs:[{l:"كسر الجليد", q:"لو تعرّف نفسك لنا بجملتين، بدون المنصب، من هو إياس؟"}],
+    trans:"خلنا نرجع بالزمن شوي، لأول يوم لك في الجامعة."
+  },
+  {
+    name:"المحور 1: إياس الطالب", short:"إياس الطالب", mins:8,
+    qs:[
+      {q:"كيف كان إياس لما دخل الجامعة أول مرة؟ وإيش كان يحلم فيه؟",
+       f:[
+        {l:"الشخصية", q:"كيف كان يوصفك زملاؤك وقتها؟ هادئ، قيادي، مشاغب؟"},
+        {l:"الطموح", q:"هل كان عندك تصور واضح لمستقبلك، أو تغيّر مع الوقت؟"}
+       ]},
+      {q:"إيش كانت توقعاتك عن الجامعة قبل ما تدخلها؟ وكيف قابلت الواقع؟",
+       f:[
+        {l:"موقف", q:"هل تتذكر صدمة أو موقفاً من أول أيامك؟"},
+        {l:"التأثير", q:"من أثّر فيك في تلك الفترة: دكتور، صديق، أو موقف؟"}
+       ]}
+    ],
+    trans:"طيب، مرّت السنين، وصرت في الجهة الثانية. كيف تغيّرت الصورة؟"
+  },
+  {
+    name:"المحور 2: من مقعد الطالب إلى موقع القيادة", short:"العودة والقيادة", mins:10,
+    qs:[
+      {q:"لما رجعت للجامعة بعد سنوات، إيش أكثر شي اختلف في نظرتك لها عن أيام الطالب؟",
+       f:[
+        {l:"الشعور", q:"إيش كان شعورك أول يوم رجعت: حنين، دهشة، مسؤولية؟"},
+        {l:"التغيّر", q:"هل الجامعة تغيّرت فعلاً، أو أنت اللي تغيّرت؟"}
+       ]},
+      {q:"كيف تحوّل تفكيرك من طالب يفكر في نفسه إلى قائد يفكر في مئات الطلاب؟",
+       f:[
+        {l:"القرارات", q:"ما أصعب قرار واجهته بحكم مسؤوليتك؟"},
+        {l:"المراجعة", q:"هل في شي كنت تشوفه صح كطالب وتشوفه بشكل مختلف الحين؟"}
+       ]},
+      {q:"إيش الشي اللي ما كان الطالب يشوفه من مقعده، وصرت تشوفه من موقعك؟",
+       f:[
+        {l:"التوازن", q:"كيف توازن بين رأي الطلاب وبين القرارات الإدارية؟"}
+       ]}
+    ],
+    trans:"طيب، لو قارنا تجربتك أنت بتجربة طالب اليوم، إيش الفرق؟"
+  },
+  {
+    name:"المحور 3: الجامعة والطالب اليوم", short:"الطالب اليوم", mins:8,
+    qs:[
+      {q:"كيف تقارن تجربتك الجامعية بتجربة الطالب الحالي؟",
+       f:[
+        {l:"الأسهل والأصعب", q:"إيش اللي صار أسهل على الطالب اليوم، وإيش اللي صار أصعب؟"},
+        {l:"الوعي", q:"هل الطالب اليوم أكثر وعياً، أو أكثر ضغطاً، أو الاثنين؟"}
+       ]},
+      {q:"إيش أهم احتياجات الطالب اليوم، وإيش أكبر التحديات اللي يواجهها؟",
+       f:[
+        {l:"التقنية", q:"الذكاء الاصطناعي والتقنية: فرصة للطالب أو تحدٍّ؟"},
+        {l:"الصحة النفسية", q:"كيف تشوف الضغط الدراسي والصحة النفسية عند الطلاب؟"},
+        {l:"المستقبل", q:"كيف تتعامل الجامعة مع قلق الطالب من سوق العمل؟"}
+       ]}
+    ],
+    trans:"ولو ننظر للمستقبل، إيش الأثر اللي تتمنى تتركه؟"
+  },
+  {
+    name:"المحور 4: الأثر والإرث", short:"الأثر والإرث", mins:7,
+    qs:[
+      {q:"إيش الأثر اللي تتمنى تتركه في الجامعة وفي الطلاب؟",
+       f:[
+        {l:"الذكرى", q:"كيف تحب الطلاب يتذكرونك؟"},
+        {l:"الإنجاز", q:"هل في مبادرة أو مشروع تعتز فيه أكثر من غيره؟"}
+       ]},
+      {q:"إيش أهم الدروس اللي تعلمتها من رحلتك من طالب إلى قائد؟",
+       f:[
+        {l:"الفشل", q:"هل في تجربة أو لحظة صعبة علمتك شي ما كنت تعرفه؟"}
+       ]}
+    ],
+    trans:"وقبل نختم..."
+  },
+  {
+    name:"الختام", short:"الختام", mins:4,
+    qs:[
+      {l:"سؤال أخير", q:"لو تقدر تكلم إياس الطالب في أول يوم جامعة، إيش النصيحة الوحدة اللي تقولها له؟"},
+      {l:"رسالة", q:"إيش رسالتك لكل طالب يسمعنا الآن؟"}
+    ],
+    outro:"شكراً لك على هذا الحديث الصادق. وللمشاهدين: كل قائد بدأ طالباً، وكل طالب اليوم قد يكون صاحب الأثر غداً. شكراً لمتابعتكم، وإلى لقاء قريب.",
+    trans:null
+  }
+];
+
+const BACKUP = {
+  name:"أسئلة احتياطية", short:"احتياطي", mins:0,
+  tip:"للتعويض عند استطراد الضيف أو إذا انتهى قسم قبل وقته.",
+  qs:[
+    {q:"إيش أطرف موقف صار لك أيام الدراسة؟"},
+    {q:"لو رجع بك الزمن، إيش النشاط أو المادة اللي كنت تتمنى تركز عليها أكثر؟"},
+    {q:"كيف تتعامل مع الانتقاد من الطلاب أو الزملاء؟"},
+    {q:"إيش الصفة اللي تشوف إنها أهم للقائد في الجامعة؟"},
+    {q:"هل في شخص كان له فضل عليك وتحب تشكره الحين؟"},
+    {q:"كيف توازن بين مسؤولياتك وحياتك الشخصية؟"}
+  ]
+};
+
+const N = SECTIONS.length;
+const BK = N;            // الأقسام المؤقتة
+const TOTAL_MS = SECTIONS.reduce((a,s)=>a+s.mins,0)*60000;
+
+/* ================= الحالة (في الذاكرة فقط) ================= */
+const st = {
+  running:false, started:false, last:0,
+  total:0, sec:SECTIONS.map(()=>0),
+  active:0, view:0,
+  done:{}, notes:{}, fired:{},
+  sound:true, fs:18, resetArm:false
+};
+
+const $ = id => document.getElementById(id);
+
+/* ================= أدوات ================= */
+function mmss(ms){
+  const s = Math.floor(Math.abs(ms)/1000);
+  return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+}
+function remText(remMs){ return (remMs<0 ? "+" : "") + mmss(remMs); }
+
+let toastT;
+function toast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),3800);
+}
+
+let actx=null;
+function beep(times){
+  if(!st.sound) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    for(let i=0;i<times;i++){
+      const o=actx.createOscillator(), g=actx.createGain();
+      o.frequency.value=880; o.connect(g); g.connect(actx.destination);
+      const t0=actx.currentTime+i*0.28;
+      g.gain.setValueAtTime(0.0001,t0);
+      g.gain.exponentialRampToValueAtTime(0.25,t0+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+0.2);
+      o.start(t0); o.stop(t0+0.22);
+    }
+  }catch(e){}
+  if(navigator.vibrate) navigator.vibrate(times>1?[200,100,200]:120);
+}
+
+let wake=null;
+async function lockScreen(){
+  try{ if(navigator.wakeLock) wake = await navigator.wakeLock.request("screen"); }catch(e){}
+}
+function unlockScreen(){ try{ wake && wake.release(); }catch(e){} wake=null; }
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible" && st.running) lockScreen(); });
+
+/* ================= الرسم ================= */
+function renderBar(){
+  const bar=$("bar"); bar.innerHTML="";
+  SECTIONS.forEach((s,i)=>{
+    const b=document.createElement("button");
+    b.className="seg"; b.style.flex=s.mins; b.setAttribute("aria-label",s.short);
+    b.innerHTML="<i></i>";
+    b.onclick=()=>setView(i);
+    b.dataset.i=i;
+    bar.appendChild(b);
+  });
+  updateBar();
+}
+function updateBar(){
+  [...$("bar").children].forEach((b,i)=>{
+    const s=SECTIONS[i];
+    const past = st.started && i<st.active;
+    const frac = Math.min(st.sec[i]/(s.mins*60000),1);
+    b.classList.toggle("past",past);
+    b.classList.toggle("active",st.started && i===st.active);
+    b.classList.toggle("over", i===st.active && st.sec[i]>s.mins*60000);
+    b.firstChild.style.width = past ? "100%" : (frac*100)+"%";
+  });
+}
+
+function renderTabs(){
+  const t=$("tabs"); t.innerHTML="";
+  SECTIONS.concat([BACKUP]).forEach((s,i)=>{
+    const b=document.createElement("button");
+    b.className="tab"+(i===st.view?" sel":"")+(st.started&&i===st.active?" live":"");
+    b.innerHTML=s.short+(s.mins?`<span class="m">${s.mins}د</span>`:"");
+    b.onclick=()=>setView(i);
+    t.appendChild(b);
+    if(i===st.view) setTimeout(()=>b.scrollIntoView({inline:"center",block:"nearest"}),0);
+  });
+}
+
+function qKey(sec,i){ return sec+"-"+i; }
+
+function renderView(){
+  const i=st.view, isBk=i===BK, s=isBk?BACKUP:SECTIONS[i];
+  const doneCount=s.qs.filter((_,k)=>st.done[qKey(i,k)]).length;
+  let h="";
+  if(!isBk && st.started && i!==st.active){
+    h+=`<div class="jump"><span>أنت تتصفح قسماً غير الجاري.</span><button id="jumpBtn">اجعله القسم الجاري</button></div>`;
+  }
+  h+=`<div class="head"><h2>${s.name}</h2><span class="cnt" id="cnt">${doneCount} من ${s.qs.length}</span></div>`;
+  if(isBk) h+=`<p class="tip">${s.tip}</p>`;
+  if(s.say) h+=`<div class="say">${s.say}</div>`;
+  const hasF=s.qs.some(q=>q.f);
+  if(hasF) h+=`<div class="legend"><span class="lm">سؤال محوري</span><span class="ls">متابعة: اسألها إن لم يذكرها الضيف</span></div>`;
+  s.qs.forEach((q,k)=>{
+    const d=st.done[qKey(i,k)];
+    h+=`<button class="q main${d?" done":""}" data-key="${qKey(i,k)}" aria-pressed="${!!d}"><span class="ck">${d?"✓":""}</span><span class="tx">${q.l?`<b>${q.l}:</b>`:""}${q.q}</span></button>`;
+    if(q.f){
+      h+=`<div class="follows">`;
+      q.f.forEach((f,j)=>{
+        const key=qKey(i,k)+"-"+j, fd=st.done[key];
+        h+=`<button class="q sub${fd?" done":""}" data-key="${key}" aria-pressed="${!!fd}"><span class="ck">${fd?"✓":""}</span><span class="tx">${f.l?`<b>${f.l}:</b>`:""}${f.q}</span></button>`;
+      });
+      h+=`</div>`;
+    }
+  });
+  if(s.outro) h+=`<div class="say out">${s.outro}</div>`;
+  if(s.trans) h+=`<div class="trans"><small>عبارة الانتقال</small>${s.trans}</div>`;
+  if(!isBk){
+    h+=`<div class="notes"><label for="nt">ملاحظاتك في هذا القسم</label><textarea id="nt" placeholder="نقاط تريد العودة لها، أو سؤال متابعة…">${(st.notes[i]||"").replace(/</g,"&lt;")}</textarea></div>`;
+  }
+  $("view").innerHTML=h;
+
+  $("view").querySelectorAll(".q").forEach(btn=>{
+    btn.onclick=()=>{
+      const key=btn.dataset.key;
+      st.done[key]=!st.done[key];
+      btn.classList.toggle("done",!!st.done[key]);
+      btn.setAttribute("aria-pressed",!!st.done[key]);
+      btn.querySelector(".ck").textContent=st.done[key]?"✓":"";
+      $("cnt").textContent=s.qs.filter((_,k)=>st.done[qKey(i,k)]).length+" من "+s.qs.length;
+    };
+  });
+  const nt=$("nt"); if(nt) nt.oninput=()=>{ st.notes[i]=nt.value; };
+  const jb=$("jumpBtn"); if(jb) jb.onclick=()=>setActive(i);
+}
+
+function setView(i){
+  st.view=i; renderTabs(); renderView();
+  window.scrollTo({top:0});
+}
+
+/* ===== الساعات والحالة ===== */
+function updateClocks(){
+  const a=SECTIONS[st.active];
+  const secRem=a.mins*60000-st.sec[st.active];
+  const totRem=TOTAL_MS-st.total;
+
+  const tv=$("totalVal"), sv=$("secVal");
+  tv.textContent=remText(totRem);
+  sv.textContent=remText(secRem);
+  tv.className="val"+(totRem<0?" over":totRem<=5*60000&&st.started?" warn":"");
+  sv.className="val"+(secRem<0?" over":secRem<=60000&&st.started?" warn":"");
+  $("secLbl").textContent=a.short;
+
+  const chip=$("chip");
+  if(!st.started){ chip.textContent="لم يبدأ بعد"; chip.className="chip"; return; }
+  const later=SECTIONS.slice(st.active+1).reduce((x,s)=>x+s.mins*60000,0);
+  const slack=(TOTAL_MS-st.total)-(Math.max(0,secRem)+later); // موجب = متقدم
+  const abs=Math.abs(slack);
+  const m=Math.floor(abs/60000), sc=Math.round((abs%60000)/1000);
+  const txt=(m? m+" د ":"")+(sc||!m? sc+" ث":"");
+  if(abs<20000){ chip.textContent="على الخطة"; chip.className="chip"; }
+  else if(slack>0){ chip.textContent="متقدم عن الخطة "+txt; chip.className="chip ahead"; }
+  else{ chip.textContent="متأخر عن الخطة "+txt; chip.className="chip "+(abs>120000?"vlate":"late"); }
+}
+
+function updateButtons(){
+  const g=$("goBtn");
+  if(!st.started){ g.textContent="ابدأ اللقاء"; g.classList.remove("paused"); }
+  else if(st.running){ g.textContent="إيقاف مؤقت"; g.classList.remove("paused"); }
+  else{ g.textContent="استئناف"; g.classList.add("paused"); }
+  const n=$("nextBtn");
+  n.disabled = st.active>=N-1;
+  n.textContent = st.active>=N-1 ? "آخر قسم" : "القسم التالي ‹";
+}
+
+function checkAlerts(){
+  const a=SECTIONS[st.active], rem=a.mins*60000-st.sec[st.active];
+  const k60=st.active+"-60", k0=st.active+"-0";
+  if(rem<=60000 && rem>0 && !st.fired[k60] && a.mins>1){
+    st.fired[k60]=1; beep(1); toast("باقي دقيقة على نهاية هذا القسم");
+  }
+  if(rem<=0 && !st.fired[k0]){
+    st.fired[k0]=1; beep(2);
+    toast(st.active<N-1?"انتهى وقت القسم، جهّز عبارة الانتقال":"انتهى الوقت المحدد للختام");
+  }
+  if(TOTAL_MS-st.total<=0 && !st.fired.tot){ st.fired.tot=1; beep(3); toast("انتهت الأربعون دقيقة"); }
+  else if(TOTAL_MS-st.total<=5*60000 && !st.fired.t5){ st.fired.t5=1; toast("باقي 5 دقائق على نهاية اللقاء"); }
+}
+
+function tick(){
+  if(!st.running) return;
+  const now=Date.now(), d=now-st.last; st.last=now;
+  st.total+=d; st.sec[st.active]+=d;
+  checkAlerts(); updateClocks(); updateBar();
+}
+setInterval(tick,250);
+
+/* ===== التحكم ===== */
+function toggleRun(){
+  closeMenu();
+  if(!st.running){
+    st.running=true; st.started=true; st.last=Date.now(); lockScreen();
+    try{ actx = actx || new (window.AudioContext||window.webkitAudioContext)(); actx.resume&&actx.resume(); }catch(e){}
+  }else{
+    st.running=false; unlockScreen();
+  }
+  updateButtons(); updateClocks(); updateBar(); renderTabs();
+  if(st.view<BK) renderViewKeepScroll();
+}
+function renderViewKeepScroll(){
+  const y=window.scrollY, nt=$("nt"), v=nt?nt.value:null;
+  renderView(); if(v!==null && $("nt")) $("nt").value=v; window.scrollTo({top:y});
+}
+function setActive(i){
+  st.active=i; st.view=i;
+  if(!st.started){ st.started=true; }
+  updateButtons(); updateClocks(); updateBar(); renderTabs(); renderView();
+  window.scrollTo({top:0});
+}
+function nextSection(){
+  closeMenu();
+  if(st.active<N-1){
+    if(!st.running && !st.started){ toggleRun(); }
+    setActive(st.active+1);
+  }
+}
+
+/* ===== القائمة ===== */
+function closeMenu(){ $("menu").classList.remove("open"); resetDisarm(); }
+function resetDisarm(){ st.resetArm=false; $("mReset").firstChild.textContent="إعادة ضبط اللقاء"; }
+
+$("moreBtn").onclick=()=>$("menu").classList.toggle("open");
+document.addEventListener("click",e=>{
+  if(!e.target.closest("#menu") && !e.target.closest("#moreBtn")) closeMenu();
+});
+$("goBtn").onclick=toggleRun;
+$("nextBtn").onclick=nextSection;
+
+$("mSound").onclick=()=>{
+  st.sound=!st.sound; $("mSoundV").textContent=st.sound?"يعمل":"متوقف";
+};
+function setFs(d){
+  st.fs=Math.min(28,Math.max(15,st.fs+d));
+  document.documentElement.style.setProperty("--fs",st.fs+"px");
+}
+$("fsPlus").onclick=()=>setFs(2);
+$("fsMinus").onclick=()=>setFs(-2);
+
+$("mCopy").onclick=async()=>{
+  const lines=[];
+  SECTIONS.forEach((s,i)=>{ if((st.notes[i]||"").trim()) lines.push(s.name+"\n"+st.notes[i].trim()); });
+  const text=lines.join("\n\n");
+  if(!text){ toast("لا توجد ملاحظات بعد"); return; }
+  try{ await navigator.clipboard.writeText(text); toast("تم نسخ الملاحظات"); }
+  catch(e){
+    const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta);
+    ta.select(); try{ document.execCommand("copy"); toast("تم نسخ الملاحظات"); }catch(_){ toast("تعذّر النسخ"); }
+    ta.remove();
+  }
+  closeMenu();
+};
+$("mReset").onclick=()=>{
+  if(!st.resetArm){
+    st.resetArm=true; $("mReset").firstChild.textContent="اضغط مرة أخرى للتأكيد"; return;
+  }
+  st.running=false; st.started=false; st.total=0; st.sec=SECTIONS.map(()=>0);
+  st.active=0; st.view=0; st.done={}; st.notes={}; st.fired={};
+  unlockScreen(); closeMenu();
+  updateButtons(); updateClocks(); renderBar(); renderTabs(); renderView();
+  toast("تمت إعادة الضبط");
+};
+
+/* ===== بدء ===== */
+renderBar(); renderTabs(); renderView(); updateButtons(); updateClocks();
+</script>
+</body>
+</html>
